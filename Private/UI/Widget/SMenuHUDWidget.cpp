@@ -4,9 +4,12 @@
 
 #include "UI/Widget/SMenuHUDWidget.h"
 
+#include "SControlWidget.h"
+#include "SDisplaySoundWidget.h"
 #include "SlateOptMacros.h"
 #include "SLogoMenuWidget.h"
 #include "SMenuWidget.h"
+#include "SMultiPlayerWidget.h"
 #include "SOptionMenuWidget.h"
 #include "Widgets/SCanvas.h"
 #include "Widgets/Layout/SConstraintCanvas.h"
@@ -22,10 +25,10 @@ void SMenuHUDWidget::Construct(const FArguments& InArgs)
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
 		//大小和位置
-		.Size(FVector2D{1920.f,1080.f})
+		.Size(FVector2D{900.f,500.f})
 		.Position(FVector2D{960.f,540.f})
 		[
-			SNew(SOptionMenuWidget)
+			SNew(SMultiPlayerWidget)
 		]
 	];
 }

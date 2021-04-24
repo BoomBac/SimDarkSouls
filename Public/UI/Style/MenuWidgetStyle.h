@@ -57,6 +57,15 @@ struct SIMDARKSOULS_API FMenuStyle : public FSlateWidgetStyle
 	//选项菜单上方箭头背景按钮
 	UPROPERTY(EditAnywhere,Category="OptionMenu")
 	FButtonStyle OptionArrowIcon;
+	//选项卡左边文字背景
+	UPROPERTY(EditAnywhere,Category="OptionMenu")
+	FSlateBrush LeftOptionBG;
+	//选项卡右边文字背景
+	UPROPERTY(EditAnywhere,Category="OptionMenu")
+	FSlateBrush RightOptionBG;
+	//选项进度条样式
+	UPROPERTY(EditAnywhere,Category="OptionMenu")
+	FProgressBarStyle BarStyle;
 };
 
 /**

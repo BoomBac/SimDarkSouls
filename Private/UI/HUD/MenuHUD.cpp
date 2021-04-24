@@ -9,6 +9,8 @@
 
 AMenuHUD::AMenuHUD()
 {
+	//绑定
+	UpdateUIText.BindUObject(this,&AMenuHUD::RemoveW);
 	if(GEngine&&GEngine->GameViewport)
 	{
 		SAssignNew(MenuHUDWidget,SMenuHUDWidget);
@@ -19,3 +21,17 @@ AMenuHUD::AMenuHUD()
 		// }
 	}
 }
+
+void AMenuHUD::RemoveW()
+{
+	GEngine->GameViewport->RemoveAllViewportWidgets();
+	if(MenuHUDWidget.IsValid())
+		MenuHUDWidget.Reset();
+
+	if(GEngine&&GEngine->GameViewport)
+	{
+		SAssignNew(MenuHUDWidget,SMenuHUDWidget);
+		GEngine->GameViewport->AddViewportWidgetContent(SNew(SWeakWidget).PossiblyNullContent(MenuHUDWidget.ToSharedRef()));
+	}
+}
+

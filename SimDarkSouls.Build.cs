@@ -25,6 +25,7 @@ public class SimDarkSouls : ModuleRules
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/UI/Widget"});
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/UI/Style"});
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Common"});
+		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Data"});
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 	}

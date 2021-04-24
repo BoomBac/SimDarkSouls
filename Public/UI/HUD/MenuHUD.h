@@ -9,6 +9,7 @@
 /**
  * 
  */
+DECLARE_DELEGATE(FUpdateUIText)
 UCLASS()
 class SIMDARKSOULS_API AMenuHUD : public AHUD
 {
@@ -16,4 +17,9 @@ class SIMDARKSOULS_API AMenuHUD : public AHUD
 public:
 	AMenuHUD();
 	TSharedPtr<class SMenuHUDWidget> MenuHUDWidget;
+	//更新ui文本语种，绑定RemoveW()，在internatinal调用
+	FUpdateUIText UpdateUIText;
+private:
+	void RemoveW();
+	
 };
