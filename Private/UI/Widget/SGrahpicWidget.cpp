@@ -75,10 +75,10 @@ void SGrahpicWidget::Construct(const FArguments& InArgs)
 						.BorderImage(&Style::GetMenuStyle()->RightOptionBG)
 						.VAlign(VAlign_Fill)
 						.HAlign(HAlign_Fill)
-						.Content()
-						[
-							//SNew(SListView<>)
-						]
+						// .Content()
+						// [
+						// 	//SNew(SListView<>)
+						// ]
 					]
 				]
 				+SHorizontalBox::Slot()

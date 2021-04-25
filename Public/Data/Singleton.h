@@ -12,8 +12,9 @@ class SIMDARKSOULS_API Singleton
 {
 public:
  static TSharedPtr<T> Get();
-private:
  static void Initialize();
+private:
+
  static TSharedPtr<T> Create();
 
  static TSharedPtr<T> TInstance;

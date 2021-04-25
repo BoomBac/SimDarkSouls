@@ -25,10 +25,10 @@ void SMenuHUDWidget::Construct(const FArguments& InArgs)
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
 		//大小和位置
-		.Size(FVector2D{900.f,500.f})
+		.Size(FVector2D{1920.f,1080.f})
 		.Position(FVector2D{960.f,540.f})
 		[
-			SNew(SMultiPlayerWidget)
+			SNew(SMenuWidget)
 		]
 	];
 }

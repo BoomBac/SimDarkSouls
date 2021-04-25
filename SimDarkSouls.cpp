@@ -15,7 +15,7 @@ void FSimDarkSoulsModule::StartupModule()
 {
 	FSlateStyleRegistry::UnRegisterSlateStyle(Style::GetStyleSetName());
 	Style::Initialize();
-	Singleton<International>::Get();
+	Singleton<International>::Initialize();
 }
 
 void FSimDarkSoulsModule::ShutdownModule()

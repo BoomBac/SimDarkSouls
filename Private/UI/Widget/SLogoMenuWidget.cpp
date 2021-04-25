@@ -5,7 +5,9 @@
 
 
 #include "DevelopTool.h"
+#include "International.h"
 #include "MenuWidgetStyle.h"
+#include "Singleton.h"
 #include "SlateOptMacros.h"
 #include "Style.h"
 #include "Widgets/SCanvas.h"
@@ -34,7 +36,7 @@ void SLogoMenuWidget::Construct(const FArguments& InArgs)
 		[		
 			SNew(STextBlock)
 			.Font(Style::GetMenuStyle()->ChineseFont_20)
-			.Text(FText::FromString(TEXT("点击鼠标左键开始")))
+			.Text(FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),FString("PAK")))
 			.Justification(ETextJustify::Center)
 		]
 
@@ -42,14 +44,12 @@ void SLogoMenuWidget::Construct(const FArguments& InArgs)
 }
 FReply SLogoMenuWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	DHelper::Debug(FString("down"));
+	
+	//设置滚动栏显示
+	if(ScrllVisiblity.ExecuteIfBound(EVisibility::Visible))
+		DHelper::Debug(FString("down"));
+
 	return FReply::Handled();
 }
-
-FReply SLogoMenuWidget::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	 return FReply::Handled();
-}
-
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

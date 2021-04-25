@@ -4,12 +4,16 @@
 #include "SMenuWidget.h"
 
 #include "DevelopTool.h"
+#include "FunctionalUIScreenshotTest.h"
+#include "International.h"
 #include "MenuWidgetStyle.h"
+#include "Singleton.h"
 #include "SlateOptMacros.h"
 #include "Style.h"
 #include "Widgets/SCanvas.h"
 #include "Widgets/Images/SImage.h"
 #include "SLogoMenuWidget.h"
+#include "TimeLineHandle.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SDPIScaler.h"
@@ -19,9 +23,17 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SMenuWidget::Construct(const FArguments& InArgs)
 {
+	//绑定ui数据元素
 	UIScaler.Bind(this, &SMenuWidget::GetUIScaler);
-	
-	InitializeAnimation();
+	TAtitleColor.Bind(this,&SMenuWidget::GetTitleColor);
+	//初始化时间轴组
+	Event_TLFinsh.BindRaw(this,&SMenuWidget::TimeLineFinish);
+	TimeLineHandle::Get()->AddTimeLineL(FName("TitleShow"),TEXT("CurveLinearColor'/Game/UI/CR_TitleColor.CR_TitleColor'")).
+			BindRaw(this,&SMenuWidget::TimeLineTitle);
+	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.SetTimelineFinishedFunc(Event_TLFinsh);
+	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.SetPlayRate(0.8f);
+	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.PlayFromStart();
+
 	ChildSlot
 	[
 		SNew(SDPIScaler)
@@ -44,6 +56,7 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 			[
 				SNew(SImage)
 				.Image(&Style::GetMenuStyle()->MainTitle)
+				.ColorAndOpacity(TAtitleColor)
 			]
 			+SCanvas::Slot()
 			.HAlign(HAlign_Center)
@@ -62,6 +75,7 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 	        .Size(FVector2D{1920.f,1080.f})
 	        [
 				SAssignNew(LogoMenu,SLogoMenuWidget)
+				.Visibility(EVisibility::Hidden)
 	        ]
 	        +SCanvas::Slot()
 	        .HAlign(HAlign_Center)
@@ -70,6 +84,7 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 	        .Size(FVector2D{240.f,200.f})
 	        [
 				SAssignNew(ScrollBox,SScrollBox)
+				.Visibility(EVisibility::Hidden)
 				//占位文本块
 				+SScrollBox::Slot()
 				.HAlign(HAlign_Fill)
@@ -89,7 +104,8 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 					[
 						SNew(STextBlock)
 						.Font(Style::GetMenuStyle()->ChineseFont_20)
-						.Text(FText::FromString(TEXT("Continue")))
+						.Text(FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),FString("Contine")))
+						.ColorAndOpacity(FLinearColor{1.f,1.f,1.f,1.f})
 						.Justification(ETextJustify::Center)
 					]			
 				]
@@ -112,7 +128,8 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 					[
 						SNew(STextBlock)
 					.Font(Style::GetMenuStyle()->ChineseFont_20)
-					.Text(FText::FromString(TEXT("StartNewGame")))
+					.Text(FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),FString("New")))
+					.ColorAndOpacity(FLinearColor{1.f,1.f,1.f,1.f})
 					.Justification(ETextJustify::Center)
 					]			
 				]
@@ -135,7 +152,8 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 					[
 						SNew(STextBlock)
 					.Font(Style::GetMenuStyle()->ChineseFont_20)
-					.Text(FText::FromString(TEXT("SystemSetting")))
+					.Text(FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),FString("Setting")))
+					.ColorAndOpacity(FLinearColor{1.f,1.f,1.f,1.f})
 					.Justification(ETextJustify::Center)
 					]			
 				]
@@ -158,7 +176,8 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 					[
 						SNew(STextBlock)
 					.Font(Style::GetMenuStyle()->ChineseFont_20)
-					.Text(FText::FromString(TEXT("News")))
+					.Text(FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),FString("News")))
+					.ColorAndOpacity(FLinearColor{1.f,1.f,1.f,1.f})
 					.Justification(ETextJustify::Center)
 					]			
 				]
@@ -181,7 +200,8 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 					[
 						SNew(STextBlock)
 					.Font(Style::GetMenuStyle()->ChineseFont_20)
-					.Text(FText::FromString(TEXT("QuitGame")))
+					.Text(FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),FString("Exit")))
+					.ColorAndOpacity(FLinearColor{1.f,1.f,1.f,1.f})
 					.Justification(ETextJustify::Center)
 					]			
 				]
@@ -197,22 +217,24 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 	        +SCanvas::Slot()
 	        .HAlign(HAlign_Center)
 	        .VAlign(VAlign_Center)
-	        .Position(DHelper::PositionConvert(FVector2D{2.f,140.f}))
+	        .Position(DHelper::PositionConvert(FVector2D{0.f,140.f}))
 	        .Size(FVector2D{23.f,19.f})
 	        [
-				SNew(SImage)
+				SAssignNew(ScrollUp,SImage)
 				.Image(&Style::GetMenuStyle()->ScrollArrow)
+				.Visibility(EVisibility::Hidden)
 	        ]
 	        +SCanvas::Slot()
 			.HAlign(HAlign_Center)
 			.VAlign(VAlign_Center)
-			.Position(DHelper::PositionConvert(FVector2D{24.f,420.f}))
+			.Position(DHelper::PositionConvert(FVector2D{0.f,390.f}))
 			.Size(FVector2D{23.f,19.f})
 			[
-				SNew(SImage)
+				SAssignNew(ScrollDown,SImage)
 				.Image(&Style::GetMenuStyle()->ScrollArrow)
 				.RenderTransformPivot(FVector2D{0.5f,0.5f})
 				.RenderTransform(FTransform2D{FQuat2D{PI},FVector2D{0.f,0.f}})
+				.Visibility(EVisibility::Hidden)
 			]
 		]
 	];
@@ -221,20 +243,21 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 	ScrollBox->SetConsumeMouseWheel(EConsumeMouseWheel::WhenScrollingPossible);
 	ScrollBox->SetAnimateWheelScrolling(true);
 	ScrollBox->SetScrollBarThickness(FVector2D{9.f,0.f});
+	LogoMenu->ScrllVisiblity.BindRaw(this,&SMenuWidget::SetScrollGruopVisibility);
 }
 
 void SMenuWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	auto dpi = GEngine->GameViewport->GetDPIScale();
-	FVector2D MousePos{0.f,0.f};
-	GEngine->GameViewport->GetMousePosition(MousePos);
-	DHelper::Debug((MousePos/dpi).ToString(),0.f);
+	// auto dpi = GEngine->GameViewport->GetDPIScale();
+	// FVector2D MousePos{0.f,0.f};
+	// GEngine->GameViewport->GetMousePosition(MousePos);
+	// DHelper::Debug((MousePos/dpi).ToString(),0.f);
+	// if(TimeLineHandle::Get()->GetTimeLineF(FName("TitleShow"))->TimelineFunc.IsBound())
+	// 	DHelper::Debug(FString("unbind"),0.f);
+	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.TickTimeline(InDeltaTime);
 }
 
-void SMenuWidget::InitializeAnimation()
-{
-}
-
+//uscaler绑定函数
 float SMenuWidget::GetUIScaler() const
 {
 	FVector2D Result(1920.f, 1080.f);
@@ -243,5 +266,34 @@ float SMenuWidget::GetUIScaler() const
 	}
 	return Result.Y/1080.f;
 }
+//title颜色绑定函数
+FSlateColor SMenuWidget::GetTitleColor() const 
+{
+	return TitleColor;
+}
+
+void SMenuWidget::TimeLineTitle(FLinearColor value)
+{
+	TitleColor = value;
+}
+
+void SMenuWidget::TimeLineFinish()
+{
+	LogoMenu->SetVisibility(EVisibility::Visible);
+}
+
+void SMenuWidget::funcf(float value)
+{
+
+}
+
+void SMenuWidget::SetScrollGruopVisibility(EVisibility bV)
+{
+	ScrollBox->SetVisibility(bV);
+	ScrollDown->SetVisibility(bV);
+	ScrollUp->SetVisibility(bV);
+	LogoMenu->SetVisibility(EVisibility::Hidden);
+}
+
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
