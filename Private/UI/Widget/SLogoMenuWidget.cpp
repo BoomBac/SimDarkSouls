@@ -44,11 +44,8 @@ void SLogoMenuWidget::Construct(const FArguments& InArgs)
 }
 FReply SLogoMenuWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	
 	//设置滚动栏显示
-	if(ScrllVisiblity.ExecuteIfBound(EVisibility::Visible))
-		DHelper::Debug(FString("down"));
-
+	ScrllVisiblity.ExecuteIfBound(EVisibility::Visible);
 	return FReply::Handled();
 }
 

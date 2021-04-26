@@ -13,7 +13,9 @@
 #include "Widgets/SCanvas.h"
 #include "Widgets/Images/SImage.h"
 #include "SLogoMenuWidget.h"
+#include "SOptionMenuWidget.h"
 #include "TimeLineHandle.h"
+#include "Widgets/SWeakWidget.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SDPIScaler.h"
@@ -26,6 +28,7 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 	//绑定ui数据元素
 	UIScaler.Bind(this, &SMenuWidget::GetUIScaler);
 	TAtitleColor.Bind(this,&SMenuWidget::GetTitleColor);
+	OnScrolled.BindRaw(this,&SMenuWidget::Scrolled);
 	//初始化时间轴组
 	Event_TLFinsh.BindRaw(this,&SMenuWidget::TimeLineFinish);
 	TimeLineHandle::Get()->AddTimeLineL(FName("TitleShow"),TEXT("CurveLinearColor'/Game/UI/CR_TitleColor.CR_TitleColor'")).
@@ -33,13 +36,14 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.SetTimelineFinishedFunc(Event_TLFinsh);
 	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.SetPlayRate(0.8f);
 	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.PlayFromStart();
-
+	ScrollOffset = 0.1f;
+	bScrollCanShow = false;
 	ChildSlot
 	[
 		SNew(SDPIScaler)
 		.DPIScale(UIScaler)
 		[
-			SNew(SCanvas)
+			SAssignNew(RootPannel,SCanvas)
 			+SCanvas::Slot()
 			.HAlign(HAlign_Fill)
 			.VAlign(VAlign_Fill)
@@ -85,6 +89,7 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 	        [
 				SAssignNew(ScrollBox,SScrollBox)
 				.Visibility(EVisibility::Hidden)
+				.OnUserScrolled(OnScrolled)
 				//占位文本块
 				+SScrollBox::Slot()
 				.HAlign(HAlign_Fill)
@@ -147,6 +152,7 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 				[
 					SNew(SButton)
 					.ButtonStyle(&Style::GetMenuStyle()->StartMenuButton)
+					.OnClicked_Raw(this,&SMenuWidget::OnClicked)
 					.ContentPadding(FMargin{0.f,0.f,0.f,0.f})
 					.Content()
 					[
@@ -255,6 +261,17 @@ void SMenuWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrent
 	// if(TimeLineHandle::Get()->GetTimeLineF(FName("TitleShow"))->TimelineFunc.IsBound())
 	// 	DHelper::Debug(FString("unbind"),0.f);
 	TimeLineHandle::Get()->GetTimeLineL(FName("TitleShow"))->Timeline.TickTimeline(InDeltaTime);
+	if(bScrollCanShow)
+	SetScrollArrowVisiblity(InDeltaTime);
+}
+
+FReply SMenuWidget::OnClicked()
+{
+	RootPannel->AddSlot().HAlign(HAlign_Fill).VAlign(VAlign_Fill).Size(FVector2D{1920.f,1080.f})
+	[
+		SNew(SOptionMenuWidget)
+	];
+	return FReply::Handled();
 }
 
 //uscaler绑定函数
@@ -284,15 +301,45 @@ void SMenuWidget::TimeLineFinish()
 
 void SMenuWidget::funcf(float value)
 {
+	
+};
+	
 
-}
 
 void SMenuWidget::SetScrollGruopVisibility(EVisibility bV)
 {
+	bScrollCanShow = true;
 	ScrollBox->SetVisibility(bV);
 	ScrollDown->SetVisibility(bV);
 	ScrollUp->SetVisibility(bV);
 	LogoMenu->SetVisibility(EVisibility::Hidden);
+}
+
+void SMenuWidget::SetScrollArrowVisiblity(float alpha)
+{
+	DHelper::Debug(FString::SanitizeFloat(ScrollOffset),0.f);
+	if(ScrollOffset<1.f)
+	{
+		ScrollUp->SetVisibility(EVisibility::Hidden);
+	}
+	else
+	{
+		ScrollUp->SetVisibility(EVisibility::Visible);
+	}
+	if(ScrollOffset>110.f)
+	{
+		ScrollDown->SetVisibility(EVisibility::Hidden);
+		//ScrollDown->SetColorAndOpacity(FMath::Lerp<FLinearColor>({1.f,1.f,1.f,1.f},{1.f,1.f,1.f,0.f},alpha));
+	}
+	else
+	{
+		ScrollDown->SetVisibility(EVisibility::Visible);
+	}
+}
+
+void SMenuWidget::Scrolled(float value)
+{
+	ScrollOffset = value;
 }
 
 

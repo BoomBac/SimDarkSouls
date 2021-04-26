@@ -12,3 +12,14 @@ namespace ECultureType
 		EN
 	};
 }
+
+namespace EOptionIconType
+{
+	enum Type
+	{
+		Control,
+		DisplaySound,
+		Multiplayer,
+		Grahpic
+	};
+}

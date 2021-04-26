@@ -12,6 +12,8 @@
  * 
  */
 //DECLARE_DYNAMIC_DELEGATE(FOnTimelineEvent)
+DECLARE_DELEGATE_OneParam(FOnUserScrolled,float );
+DECLARE_DELEGATE_RetVal( FReply, FOnClicked )
 
 class SIMDARKSOULS_API SMenuWidget : public SCompoundWidget
 {
@@ -28,14 +30,23 @@ public:
 	void TimeLineFinish();
 	void funcf(float value);
 private:
-
+	TSharedPtr<class SCanvas> RootPannel;
 	//scrollbox
 	void SetScrollGruopVisibility(EVisibility bV);
+	//根据scrolloffset设置其显示
+	void SetScrollArrowVisiblity(float alpha);
+	float ScrollOffset;
+	bool bScrollCanShow;
+	FOnUserScrolled OnScrolled;
+	//绑定到onscroll 根据scrollbox的偏移值设置ScrollOffset;
+	void Scrolled(float value);
 	//logo menu
 	TSharedPtr<class SLogoMenuWidget> LogoMenu;
 	TSharedPtr<class SScrollBox> ScrollBox;
 	TSharedPtr<class SImage> ScrollUp;
 	TSharedPtr<class SImage> ScrollDown;
+	//option menu
+	FReply OnClicked();
 	//uiscaler属性
 	TAttribute<float> UIScaler;
 	float GetUIScaler() const;
