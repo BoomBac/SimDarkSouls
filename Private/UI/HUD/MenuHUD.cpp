@@ -15,10 +15,10 @@ AMenuHUD::AMenuHUD()
 	{
 		SAssignNew(MenuHUDWidget,SMenuHUDWidget);
 		GEngine->GameViewport->AddViewportWidgetContent(SNew(SWeakWidget).PossiblyNullContent(MenuHUDWidget.ToSharedRef()));
-		// if (FString("GameMap") == UGameplayStatics::GetCurrentLevelName(GWorld))
-		// {
-		// 	GEngine->GameViewport->RemoveAllViewportWidgets();
-		// }
+		if (FString("GameMap") == UGameplayStatics::GetCurrentLevelName(GWorld))
+		{
+			GEngine->GameViewport->RemoveAllViewportWidgets();
+		}
 	}
 }
 

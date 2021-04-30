@@ -235,14 +235,13 @@ void SControlWidget::Construct(const FArguments& InArgs)
 FReply SControlWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	
-	auto pos = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
-	DHelper::Debug(pos.ToString(),0.f);
+	// auto pos = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
+	// DHelper::Debug(pos.ToString(),0.f);
 	return FReply::Handled();
 }
 
 FReply SControlWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	Singleton<International>::Get()->SetCulture(ECultureType::EN);
 	return FReply::Handled();
 }
 

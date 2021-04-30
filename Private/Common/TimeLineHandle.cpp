@@ -27,8 +27,7 @@ FOnTimelineFloatStatic& TimeLineHandle::AddTimeLineF(FName Key, const TCHAR* Cur
 {
 	TSharedPtr<STLFloat> timeline = MakeShareable(new STLFloat());
 	//加载蓝图中的曲线资源
-	ConstructorHelpers::FObjectFinder<UCurveFloat> fcurve(CurvePath);
-	timeline->TimelineCurve = fcurve.Object;
+	timeline->TimelineCurve = LoadObject<UCurveFloat>(nullptr,CurvePath);
 	TlFloatMap.Add(Key,timeline);
 	return timeline->TimelineFunc;
 }
@@ -36,8 +35,7 @@ FOnTimelineFloatStatic& TimeLineHandle::AddTimeLineF(FName Key, const TCHAR* Cur
 FOnTimelineVectorStatic& TimeLineHandle::AddTimeLineV(FName Key, const TCHAR* CurvePath)
 {
 	TSharedPtr<STLVector> timeline = MakeShareable(new STLVector());
-	ConstructorHelpers::FObjectFinder<UCurveVector> lcurve(CurvePath);
-	timeline->TimelineCurve = lcurve.Object;
+	timeline->TimelineCurve = LoadObject<UCurveVector>(nullptr,CurvePath);
 	TlVectorMap.Add(Key,timeline);
 	return timeline->TimelineFunc;
 }
@@ -45,8 +43,7 @@ FOnTimelineVectorStatic& TimeLineHandle::AddTimeLineV(FName Key, const TCHAR* Cu
 FOnTimelineLinearColorStatic& TimeLineHandle::AddTimeLineL(FName Key, const TCHAR* CurvePath)
 {
 	TSharedPtr<STLLinearColor> timeline = MakeShareable(new STLLinearColor());
-	const ConstructorHelpers::FObjectFinder<UCurveLinearColor> lurve(CurvePath);
-	timeline->TimelineCurve = lurve.Object;
+	timeline->TimelineCurve = LoadObject<UCurveLinearColor>(nullptr,CurvePath);
 	TlLinearColorMap.Add(Key,timeline);
 	return timeline->TimelineFunc;
 }

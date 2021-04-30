@@ -40,6 +40,8 @@ private:
 	FOnUserScrolled OnScrolled;
 	//绑定到onscroll 根据scrollbox的偏移值设置ScrollOffset;
 	void Scrolled(float value);
+	//按钮绑定函数
+	FReply OnNewGameCilcked() const;
 	//logo menu
 	TSharedPtr<class SLogoMenuWidget> LogoMenu;
 	TSharedPtr<class SScrollBox> ScrollBox;

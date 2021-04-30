@@ -15,7 +15,7 @@
 #include "SLogoMenuWidget.h"
 #include "SOptionMenuWidget.h"
 #include "TimeLineHandle.h"
-#include "Widgets/SWeakWidget.h"
+#include "Kismet/GameplayStatics.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Layout/SDPIScaler.h"
@@ -128,6 +128,7 @@ void SMenuWidget::Construct(const FArguments& InArgs)
 				[
 					SNew(SButton)
 					.ButtonStyle(&Style::GetMenuStyle()->StartMenuButton)
+					.OnClicked_Raw(this,&SMenuWidget::OnNewGameCilcked)
 					.ContentPadding(FMargin{0.f,0.f,0.f,0.f})
 					.Content()
 					[
@@ -317,7 +318,6 @@ void SMenuWidget::SetScrollGruopVisibility(EVisibility bV)
 
 void SMenuWidget::SetScrollArrowVisiblity(float alpha)
 {
-	DHelper::Debug(FString::SanitizeFloat(ScrollOffset),0.f);
 	if(ScrollOffset<1.f)
 	{
 		ScrollUp->SetVisibility(EVisibility::Hidden);
@@ -340,6 +340,12 @@ void SMenuWidget::SetScrollArrowVisiblity(float alpha)
 void SMenuWidget::Scrolled(float value)
 {
 	ScrollOffset = value;
+}
+
+FReply SMenuWidget::OnNewGameCilcked() const
+{
+	UGameplayStatics::OpenLevel(UGameplayStatics::GetPlayerController(GWorld,0)->GetWorld(),FName("GameMap"));
+	return FReply::Handled();
 }
 
 

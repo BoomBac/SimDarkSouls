@@ -26,6 +26,8 @@ private:
 	//顶部选项卡组
 	TSharedPtr<SWidget> CurrentOption;
 	TSharedPtr<SButton> Left;
+	TSharedPtr<STextBlock> TopTitle;
+	FText GetTitleText() const;
 	FReply OnLeftClicked();
 	TSharedPtr<SButton> Controller;
 	void OnControlHovered();
@@ -39,7 +41,6 @@ private:
 	FReply OnRightClicked();
 	//顶部选项材质.贴图.样式
 	UMaterialInterface* OptionIconMatInst;
-	UPROPERTY()
 	UMaterialInstanceDynamic* ControlDynamic;
 	UMaterialInstanceDynamic* SoundDynamic;
 	UMaterialInstanceDynamic* GraphicDynamic;
@@ -57,6 +58,7 @@ private:
 	//mapgroup
 	TMap<EOptionIconType::Type,UMaterialInstanceDynamic*> IconMaterialMap;
 	TMap<EOptionIconType::Type,TSharedPtr<SButton>> IconButtonMap;
+	TMap<EOptionIconType::Type,FText> TopTitleMap;
 	//Tarray 用于防止材质实例被gc
 	UPROPERTY()
 	TArray<UMaterialInstanceDynamic*> IconMaterialArr;

@@ -5,10 +5,12 @@
 
 #include "DevelopTool.h"
 #include "GeneratedCodeHelpers.h"
+#include "International.h"
 #include "MenuWidgetStyle.h"
 #include "SControlWidget.h"
 #include "SDisplaySoundWidget.h"
 #include "SGrahpicWidget.h"
+#include "Singleton.h"
 #include "SlateOptMacros.h"
 #include "SMultiPlayerWidget.h"
 #include "Style.h"
@@ -188,7 +190,17 @@ void SOptionMenuWidget::Construct(const FArguments& InArgs)
 					]
 				]
 			]
-		]		
+		]
+		+SCanvas::Slot()
+		.HAlign(HAlign_Left)
+		.VAlign(VAlign_Top)
+		.Position(FVector2D{364.f,132.f})
+		.Size(FVector2D{200.f,40.f})
+		[
+			SAssignNew(TopTitle,STextBlock)
+			.Font(Style::GetMenuStyle()->ChineseFont_20)
+			.Text_Raw(this,&SOptionMenuWidget::GetTitleText)
+		]
 	];
 	InitializeIconStyle();
 	InitializeIconMap();
@@ -262,6 +274,10 @@ void SOptionMenuWidget::InitializeIconMap()
 	IconButtonMap.Add(EOptionIconType::Grahpic,Graphic.ToSharedRef());
 	IconButtonMap.Add(EOptionIconType::Multiplayer,MultiPlayer.ToSharedRef());
 	IconButtonMap.Add(EOptionIconType::DisplaySound,Sound.ToSharedRef());
+	TopTitleMap.Add(EOptionIconType::Control,FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),TEXT("Control")));
+	TopTitleMap.Add(EOptionIconType::Grahpic,FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),TEXT("Grahpic")));
+	TopTitleMap.Add(EOptionIconType::Multiplayer,FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),TEXT("MP")));
+	TopTitleMap.Add(EOptionIconType::DisplaySound,FText::FromStringTable(Singleton<International>::Get()->GetCultureAsFname(),TEXT("Display")));
 	CurrentIcon = EOptionIconType::DisplaySound;
 	RootPannel->AddSlot().HAlign(HAlign_Center).VAlign(VAlign_Center).Position(DHelper::PositionConvert(FVector2D{0.f,55.f})).Size(FVector2D{1170.f,500.f})
 	[
@@ -286,6 +302,11 @@ void SOptionMenuWidget::Tick(const FGeometry& AllottedGeometry, const double InC
 void SOptionMenuWidget::AddReferencedObjects(FReferenceCollector& Collector)
 {
 	Collector.AddReferencedObjects(IconMaterialArr);
+}
+
+FText SOptionMenuWidget::GetTitleText() const
+{
+	return *TopTitleMap.Find(CurrentIcon);
 }
 
 FReply SOptionMenuWidget::OnLeftClicked()
