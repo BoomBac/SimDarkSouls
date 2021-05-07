@@ -28,6 +28,8 @@ protected:
 	void Run();
 	void unRun();
 	void ViewLock();
+	void Attack();
+	void Roll();
 
 	void CalculateAnimData();
 protected:

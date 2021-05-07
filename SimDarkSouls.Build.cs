@@ -27,6 +27,7 @@ public class SimDarkSouls : ModuleRules
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Common"});
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Data"});
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Player"});
+		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Player/AnimNotify"});
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Weapon"});
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true

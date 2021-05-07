@@ -2,6 +2,9 @@
 
 
 #include "PlayerCharacter.h"
+
+#include "AnimInst.h"
+#include "DevelopTool.h"
 #include "PlayController.h"
 #include "WeaponObject.h"
 #include "Camera/CameraComponent.h"
@@ -118,6 +121,39 @@ void APlayerCharacter::ViewLock()
 	bIsViewLocked = true;
 }
 
+void APlayerCharacter::Attack()
+{
+	
+	auto c = Cast<UAnimInst>(GetMesh()->AnimScriptInstance);
+	c->Attack();
+}
+
+void APlayerCharacter::Roll()
+{
+	auto c = Cast<UAnimInst>(GetMesh()->AnimScriptInstance);
+	if(!bIsViewLocked)
+	{
+		c->Roll(0);
+		return;
+	}
+	int Direction = 0;
+	// 0f 1b 2r 3l
+	if(MoveForward==1) Direction = 0;
+	else 
+	{
+		if(MoveForward==-1) Direction = 1;
+		else
+		{
+			if(MoveRight==1) Direction = 2;
+			else
+			{
+				if(MoveRight==-1) Direction = 3;
+			}
+		}
+	}
+	c->Roll(Direction);
+}
+
 void APlayerCharacter::CalculateAnimData()
 {
 	auto ControlRotation = PlayerController->GetControlRotation();
@@ -144,7 +180,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUp);
 	PlayerInputComponent->BindAction("Run",IE_Pressed,this,&APlayerCharacter::Run);
+	PlayerInputComponent->BindAction("Run",IE_DoubleClick,this,&APlayerCharacter::Roll);
 	PlayerInputComponent->BindAction("Run",IE_Released,this,&APlayerCharacter::unRun);
 	PlayerInputComponent->BindAction("ViewLock",IE_Pressed,this,&APlayerCharacter::ViewLock);
+	PlayerInputComponent->BindAction("Attack",IE_Pressed,this,&APlayerCharacter::Attack);
 }
 

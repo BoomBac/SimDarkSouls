@@ -11,13 +11,77 @@
 UAnimInst::UAnimInst()
 {
 	WalkForward_Anim = 0.f;
+	bCanCombat = false;
+	bCanAttack = true;
+	bCanRoll = true;
+	ConstructorHelpers::FObjectFinder<UAnimMontage> al1(TEXT("AnimMontage'/Game/Characters/Animation/Montage/Sword_AttackLight1_Montage.Sword_AttackLight1_Montage'"));
+	MontageAL1 = al1.Object;
+	ConstructorHelpers::FObjectFinder<UAnimMontage> al2(TEXT("AnimMontage'/Game/Characters/Animation/Montage/Sword_AttackLight2_Montage.Sword_AttackLight2_Montage'"));
+	MontageAL2 =al2.Object;
+	ConstructorHelpers::FObjectFinder<UAnimMontage> ah1(TEXT("AnimMontage'/Game/Characters/Animation/Montage/Sword_AttackHeavery_Montage.Sword_AttackHeavery_Montage'"));
+	MontageAH1 = ah1.Object;
+	ConstructorHelpers::FObjectFinder<UAnimMontage> rf(TEXT("AnimMontage'/Game/Characters/Animation/Montage/RollForward_Root_Montage.RollForward_Root_Montage'"));
+	MontageRF=rf.Object;
+	ConstructorHelpers::FObjectFinder<UAnimMontage> rb(TEXT("AnimMontage'/Game/Characters/Animation/Montage/RollBackward_Root_Montage.RollBackward_Root_Montage'"));
+	MontageRB=rb.Object;
+	ConstructorHelpers::FObjectFinder<UAnimMontage> rl(TEXT("AnimMontage'/Game/Characters/Animation/Montage/RollLeft_Root_Montage.RollLeft_Root_Montage'"));
+	MontageRL=rl.Object;
+	ConstructorHelpers::FObjectFinder<UAnimMontage> rr(TEXT("AnimMontage'/Game/Characters/Animation/Montage/RollRight_Root_Montage.RollRight_Root_Montage'"));
+	MontageRR=rr.Object;
+	
 }
 
 void UAnimInst::NativeUpdateAnimation(float DeltaSeconds)
 {
+	
 	InitCharacter();
 	UpdateParameter();
+}
+
+void UAnimInst::Attack()
+{
+	if(Montage_IsPlaying(nullptr)&&!bCanAttack) return;
+	bCanAttack = false;
+	 if(!bCanCombat)
+	 {
+	 	Montage_Play(MontageAL1);
+	 	bCanCombat = true;
+	 	GetWorld()->GetTimerManager().SetTimer(CombatHandle,this,&UAnimInst::DisableCombat,0.8f);
+	 }
+	 else
+	 {
+	 	Montage_Play(MontageAL2);
+	 	DisableCombat();
+	 	GetWorld()->GetTimerManager().ClearTimer(CombatHandle);
+	 }
+}
+
+void UAnimInst::Roll(int Direction)
+{
+	if(!bCanRoll) return;
+	// 0f 1b 2r 3l
+	bCanRoll = false;
+	switch (Direction)
+	{	
+		case 0:
+			Montage_Play(MontageRF,0.8);
+		break;
+		case 1:
+			Montage_Play(MontageRB,0.8f);
+		break;
+		case 2:
+			Montage_Play(MontageRR,0.8f);
+		break;
+		case 3:
+			Montage_Play(MontageRL,0.8f);
+		break;
+	}
 	
+}
+
+void UAnimInst::DisableCombat()
+{
+	bCanCombat = false;
 }
 
 void UAnimInst::InitCharacter()
@@ -28,7 +92,6 @@ void UAnimInst::InitCharacter()
 
 void UAnimInst::UpdateParameter()
 {
-	
 	if(!Character) return;
 	bisFall_Anim = Character->GetMovementComponent()->IsFalling();
 	bisRun_Anim = Character->bIsRun;
@@ -46,3 +109,4 @@ void UAnimInst::UpdateParameter()
 	}
 	FootAlpha_Anim = GetCurveValue("Foot");
 }
+

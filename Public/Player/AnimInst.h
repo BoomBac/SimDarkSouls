@@ -16,7 +16,12 @@ class SIMDARKSOULS_API UAnimInst : public UAnimInstance
 public:
 	UAnimInst();
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
+	FTimerHandle CombatHandle;
+	void Attack();
+	void Roll(int Direction);
+	void FORCEINLINE DisableCombat();
+	bool bCanAttack;
+	bool bCanRoll;
 	UPROPERTY(BlueprintReadOnly)
 	float WalkRight_Anim;
 	UPROPERTY(BlueprintReadOnly)
@@ -31,12 +36,21 @@ public:
 	bool bisFall_Anim;
 	class APlayerCharacter* Character;
 
-protected:
-	
+protected:	
 	//初始化角色指针
 	void InitCharacter();
 	//更新蓝图数据
 	void UpdateParameter();
-private:
+	//
+	bool bCanCombat;
 
+protected:
+	UAnimMontage* MontageAL1;
+	UAnimMontage* MontageAL2;
+	UAnimMontage* MontageAH1;
+	UAnimMontage* MontageRF;
+	UAnimMontage* MontageRB;
+	UAnimMontage* MontageRL;
+	UAnimMontage* MontageRR;
+	
 };
