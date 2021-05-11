@@ -24,7 +24,22 @@ struct SIMDARKSOULS_API FGameStyle : public FSlateWidgetStyle
 	static const FName TypeName;
 	virtual const FName GetTypeName() const override { return TypeName; };
 	static const FGameStyle& GetDefault();
-
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FSlateBrush HeadIcon;
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FProgressBarStyle HPBarStyle;
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FProgressBarStyle MPBarStyle;
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FProgressBarStyle PPBarStyle;
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FSlateBrush Item;
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FSlateBrush ExpBack;
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FSlateBrush ExpFront;
+	UPROPERTY(EditAnywhere,Category="GameHUD")
+	FSlateFontInfo English_12;
 };
 
 /**

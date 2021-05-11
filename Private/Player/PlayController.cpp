@@ -3,6 +3,11 @@
 
 #include "PlayController.h"
 
+#include "DevelopTool.h"
+#include "PlayeState.h"
+#include "GameFramework/PlayerInput.h"
+
+
 APlayController::APlayController()
 {
 	
@@ -17,4 +22,27 @@ void APlayController::BeginPlay()
 	FInputModeGameOnly InputMode;
 	InputMode.SetConsumeCaptureMouseDown(true);
 	SetInputMode(InputMode);
+	if(!SPState)
+		SPState = Cast<APlayeState>(PlayerState);
+}
+
+void APlayController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	//FInputActionKeyMapping HPUP("HPUP", EKeys::Up, 0, 0, 0, 0);
+	InputComponent->BindAction("HPUP",IE_Pressed,this,&APlayController::AddHP);
+	//FInputActionKeyMapping HPdown("HPdown", EKeys::Down, 0, 0, 0, 0);
+	InputComponent->BindAction("HPdown",IE_Pressed,this,&APlayController::SubHP);
+}
+
+void APlayController::AddHP()
+{
+	SPState->UpdateHPMaterial.ExecuteIfBound();
+	SPState->GetStateInfo().hp.currnt+=250.f;
+}
+
+void APlayController::SubHP()
+{
+	SPState->UpdateHPMaterial.ExecuteIfBound();
+	SPState->GetStateInfo().hp.currnt-=250.f;
 }

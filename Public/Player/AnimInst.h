@@ -19,6 +19,7 @@ public:
 	FTimerHandle CombatHandle;
 	void Attack();
 	void Roll(int Direction);
+	void Dodge();
 	void FORCEINLINE DisableCombat();
 	bool bCanAttack;
 	bool bCanRoll;
@@ -52,5 +53,6 @@ protected:
 	UAnimMontage* MontageRB;
 	UAnimMontage* MontageRL;
 	UAnimMontage* MontageRR;
+	UAnimMontage* MontageDodge;
 	
 };

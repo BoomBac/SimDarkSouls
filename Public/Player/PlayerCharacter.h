@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "PlayeState.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UAnimInst;
 UCLASS()
 class SIMDARKSOULS_API APlayerCharacter : public ACharacter
 {
@@ -30,11 +33,14 @@ protected:
 	void ViewLock();
 	void Attack();
 	void Roll();
-
 	void CalculateAnimData();
 protected:
 	//gamelay value
-	class APlayController* PlayerController;
+	class APlayController* DSPlayerController;
+	APlayeState* DSPlayerState;
+	UPROPERTY()
+	UAnimInst* Animation;
+	
 public:
 	UPROPERTY(VisibleDefaultsOnly)
 	class USpringArmComponent* CameraBoom;
@@ -44,6 +50,7 @@ public:
 	UChildActorComponent* RighetHandIbject;
 	UPROPERTY(VisibleDefaultsOnly)
 	UChildActorComponent* LeftHandObject;
+
 	//用于动画的变量
 	float MoveForward;
 	float MoveRight;

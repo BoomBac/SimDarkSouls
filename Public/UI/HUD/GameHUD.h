@@ -13,5 +13,11 @@ UCLASS()
 class SIMDARKSOULS_API AGameHUD : public AHUD
 {
 	GENERATED_BODY()
-	
+public:
+	AGameHUD();
+	virtual void BeginPlay() override;
+private:
+	TSharedPtr<class SGameHUDWidget> GameHUDWidget;
+	UPROPERTY()
+	class ASDSGameMode* GM;
 };

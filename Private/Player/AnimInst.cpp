@@ -14,7 +14,7 @@ UAnimInst::UAnimInst()
 	bCanCombat = false;
 	bCanAttack = true;
 	bCanRoll = true;
-	ConstructorHelpers::FObjectFinder<UAnimMontage> al1(TEXT("AnimMontage'/Game/Characters/Animation/Montage/Sword_AttackLight1_Montage.Sword_AttackLight1_Montage'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> al1(TEXT("AnimMontage'/Game/Characters/Animation/Montage/Sword_AttackLight1_Montage.Sword_AttackLight1_Montage'"));
 	MontageAL1 = al1.Object;
 	ConstructorHelpers::FObjectFinder<UAnimMontage> al2(TEXT("AnimMontage'/Game/Characters/Animation/Montage/Sword_AttackLight2_Montage.Sword_AttackLight2_Montage'"));
 	MontageAL2 =al2.Object;
@@ -28,7 +28,8 @@ UAnimInst::UAnimInst()
 	MontageRL=rl.Object;
 	ConstructorHelpers::FObjectFinder<UAnimMontage> rr(TEXT("AnimMontage'/Game/Characters/Animation/Montage/RollRight_Root_Montage.RollRight_Root_Montage'"));
 	MontageRR=rr.Object;
-	
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> dodge(TEXT("AnimMontage'/Game/Characters/Animation/Montage/Sword_Dodge_Montage.Sword_Dodge_Montage'"));
+	MontageDodge = dodge.Object;
 }
 
 void UAnimInst::NativeUpdateAnimation(float DeltaSeconds)
@@ -46,7 +47,7 @@ void UAnimInst::Attack()
 	 {
 	 	Montage_Play(MontageAL1);
 	 	bCanCombat = true;
-	 	GetWorld()->GetTimerManager().SetTimer(CombatHandle,this,&UAnimInst::DisableCombat,0.8f);
+	 	GetWorld()->GetTimerManager().SetTimer(CombatHandle,this,&UAnimInst::DisableCombat,0.6f);
 	 }
 	 else
 	 {
@@ -77,6 +78,13 @@ void UAnimInst::Roll(int Direction)
 		break;
 	}
 	
+}
+
+void UAnimInst::Dodge()
+{
+	if(!bCanRoll) return;
+	bCanRoll = false;
+	Montage_Play(MontageDodge);
 }
 
 void UAnimInst::DisableCombat()

@@ -36,6 +36,8 @@ APlayerCharacter::APlayerCharacter()
 	//获取第三人称的动作蓝图
 	ConstructorHelpers::FClassFinder<UAnimInstance> StaticAnimFirst(TEXT("AnimBlueprint'/Game/Characters/Animation/ABP_Character.ABP_Character_C'"));
 	GetMesh()->AnimClass = StaticAnimFirst.Class;
+	//初始化动作蓝图
+	
 	//摄像机手臂
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -54,6 +56,8 @@ APlayerCharacter::APlayerCharacter()
 	//实例手上物品
 	RighetHandIbject = CreateDefaultSubobject<UChildActorComponent>(TEXT("RightHand"));
 	LeftHandObject = CreateDefaultSubobject<UChildActorComponent>(TEXT("LeftHand"));
+	
+	
 
 	bIsViewLocked = false;
 	bIsFalling = false;
@@ -64,7 +68,10 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	PlayerController = Cast<APlayController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	DSPlayerController = Cast<APlayController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	DSPlayerState = Cast<APlayeState>(DSPlayerController->PlayerState);
+	//这句放在构造时，调用动画实例的函数会报空
+	Animation = Cast<UAnimInst>(GetMesh()->AnimScriptInstance);
 	//把手持物品组件绑定到第三人称模型右手插槽上
 	RighetHandIbject->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Weapon"));
 	LeftHandObject->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Shield"));
@@ -75,11 +82,13 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::GetMoveForward(float value)
 {
 	MoveForward = value;
-	
+
 	if(MoveForward!=0&&!bIsViewLocked)
 	{
 		//RotationFromXVector
 		MoveRotation = MoveDirection.Rotation();
+		//蒙太奇播放时，锁住操作
+		if(Animation->Montage_IsPlaying(nullptr)) return;
 		SetActorRotation(
 			FRotator(0.f,FMath::RInterpTo(GetActorRotation(),MoveRotation,GWorld->DeltaTimeSeconds,10.f).Yaw,0.f));
 	}
@@ -88,10 +97,13 @@ void APlayerCharacter::GetMoveForward(float value)
 void APlayerCharacter::GetMoveRight(float value)
 {
 	MoveRight = value;
+
 	if(MoveRight!=0&&!bIsViewLocked)
 	{
 		//RotationFromXVector
 		MoveRotation = MoveDirection.Rotation();
+		//蒙太奇播放时，锁住操作
+		if(Animation->Montage_IsPlaying(nullptr)) return;
 		SetActorRotation(
 			FRotator(0.f,FMath::RInterpTo(GetActorRotation(),MoveRotation,GWorld->DeltaTimeSeconds,10.f).Yaw,0.f));
 	}
@@ -109,7 +121,12 @@ void APlayerCharacter::LookUp(float Value)
 
 void APlayerCharacter::Run()
 {
+	if(FMath::Abs(MoveForward)+FMath::Abs(MoveRight)>0)
 	bIsRun = true;
+	else
+	{
+		Animation->Dodge();
+	}	
 }
 void APlayerCharacter::unRun()
 {
@@ -123,17 +140,14 @@ void APlayerCharacter::ViewLock()
 
 void APlayerCharacter::Attack()
 {
-	
-	auto c = Cast<UAnimInst>(GetMesh()->AnimScriptInstance);
-	c->Attack();
+	Animation->Attack();
 }
 
 void APlayerCharacter::Roll()
 {
-	auto c = Cast<UAnimInst>(GetMesh()->AnimScriptInstance);
 	if(!bIsViewLocked)
 	{
-		c->Roll(0);
+		Animation->Roll(0);
 		return;
 	}
 	int Direction = 0;
@@ -151,12 +165,12 @@ void APlayerCharacter::Roll()
 			}
 		}
 	}
-	c->Roll(Direction);
+	Animation->Roll(Direction);
 }
 
 void APlayerCharacter::CalculateAnimData()
 {
-	auto ControlRotation = PlayerController->GetControlRotation();
+	auto ControlRotation = DSPlayerController->GetControlRotation();
 	auto direction = MoveForward * UKismetMathLibrary::GetForwardVector(FRotator{0.f,ControlRotation.Yaw,0.f})+
 		MoveRight * UKismetMathLibrary::GetRightVector(FRotator{0.f,ControlRotation.Yaw,0.f});
 	MoveDirection = UKismetMathLibrary::Normal(direction);
@@ -167,7 +181,6 @@ void APlayerCharacter::CalculateAnimData()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
 	CalculateAnimData();
 }
 
