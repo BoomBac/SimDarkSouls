@@ -9,7 +9,7 @@
 #include "Modules/ModuleManager.h"
 #include "Styling/SlateStyleRegistry.h"
 
-
+DEFINE_LOG_CATEGORY(LogAI);
 
 void FSimDarkSoulsModule::StartupModule()
 {

@@ -3,10 +3,32 @@
 
 #include "NotifyAttackEnd.h"
 
+#include "AnimBoss.h"
 #include "AnimInst.h"
+#include "AttackComponent.h"
+#include "BossCharacter.h"
+#include "PlayerCharacter.h"
 
 void UNotifyAttackEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	if(auto c = Cast<UAnimInst>(MeshComp->GetAnimInstance()))
-		c ->bCanAttack = true;
+	auto OwnerActor = MeshComp->GetOwner();
+	if(Cast<APlayerCharacter>(OwnerActor)->StaticClass() == APlayerCharacter::StaticClass())
+	{
+		UAnimInst* anim = Cast<UAnimInst>(MeshComp->GetAnimInstance());
+		if (anim)
+		{
+			anim->bCanAttack = true;
+			anim->Character->AttackComponent->bDetectenable = false;
+			return;
+		}
+	}
+	if(Cast<ABossCharacter>(OwnerActor)->StaticClass() ==ABossCharacter::StaticClass())
+	{
+		if(auto boss = Cast<ABossCharacter>(OwnerActor))
+		{
+			boss->AttackComponent->bDetectenable = false;
+			boss->bCanSetRotation = true;
+		}
+	}
+
 }

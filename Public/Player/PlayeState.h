@@ -10,7 +10,9 @@
  * 
  */
 DECLARE_DELEGATE_FourParams(FOnLimitChanged,float,float,float,float)
-DECLARE_DELEGATE(FUpdateHPMaterial)
+DECLARE_DELEGATE_OneParam(FUpdateHPMaterial,float)
+DECLARE_DELEGATE_OneParam(FUpdateMPMaterial,float)
+DECLARE_DELEGATE_OneParam(FUpdatePPMaterial,float)
 
 USTRUCT(BlueprintType)
 struct FRawAttribute
@@ -47,10 +49,14 @@ class SIMDARKSOULS_API APlayeState : public APlayerState
 public:
 	APlayeState();
 	FStateInfo& GetStateInfo();
-	void SetStateInfo(FStateInfo NewValue);
+	void SetStateInfo();
 	//委托用于设置defalutinfo
 	FOnLimitChanged OnLimitChanged;
+	//一下三个只有数值剧烈变化时才需要执行
 	FUpdateHPMaterial UpdateHPMaterial;
+	FUpdateMPMaterial UpdateMPMaterial;
+	FUpdatePPMaterial UpdatePPMaterial;
 private:
 	FStateInfo StateInfo;
+
 };

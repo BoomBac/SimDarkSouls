@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 
+#include "AttackDetect.h"
 #include "PlayeState.h"
+#include "Types.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
@@ -34,13 +36,13 @@ protected:
 	void Attack();
 	void Roll();
 	void CalculateAnimData();
-protected:
+private:
 	//gamelay value
 	class APlayController* DSPlayerController;
 	APlayeState* DSPlayerState;
 	UPROPERTY()
 	UAnimInst* Animation;
-	
+	FAttackInfo CurrentInfo;
 public:
 	UPROPERTY(VisibleDefaultsOnly)
 	class USpringArmComponent* CameraBoom;
@@ -50,6 +52,12 @@ public:
 	UChildActorComponent* RighetHandIbject;
 	UPROPERTY(VisibleDefaultsOnly)
 	UChildActorComponent* LeftHandObject;
+	UPROPERTY(VisibleDefaultsOnly)
+	class UAttackComponent* AttackComponent;
+	UFUNCTION()
+	void OnHitted(FAttackInfo AttackInfo);
+	
+	EPlayerState::Type PlayerCombatState;
 
 	//用于动画的变量
 	float MoveForward;
@@ -59,10 +67,20 @@ public:
 	bool bIsFalling;
 	FRotator MoveRotation;
 	FVector MoveDirection;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	UFUNCTION()
+	void ReducePP(float ReduceRate);
+	UFUNCTION()
+	void RecoverPP();
+private:
+	FTimerHandle Runhandle;
+	//耐力恢复定时器
+	FTimerHandle PPRecoverHandle;
+	bool bRecoverHandleSet;
 };
+

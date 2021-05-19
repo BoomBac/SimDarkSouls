@@ -8,7 +8,7 @@ public class SimDarkSouls : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","GameplayTasks" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 		
@@ -29,6 +29,9 @@ public class SimDarkSouls : ModuleRules
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Player"});
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Player/AnimNotify"});
 		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/Weapon"});
+		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/NPC/Boss"});
+		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/NPC/Boss/Task"});
+		PublicIncludePaths.AddRange(new string[]{"SimDarkSouls/Public/NPC/Boss/Service"});
 
 		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 	}

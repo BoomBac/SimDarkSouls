@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 
+//Logging for your AI system
+DECLARE_LOG_CATEGORY_EXTERN(LogAI, Log, All);
+
 class FSimDarkSoulsModule : public FDefaultGameModuleImpl
 {
 public:

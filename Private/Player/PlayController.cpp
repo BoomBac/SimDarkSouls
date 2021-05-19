@@ -37,12 +37,12 @@ void APlayController::SetupInputComponent()
 
 void APlayController::AddHP()
 {
-	SPState->UpdateHPMaterial.ExecuteIfBound();
+	SPState->UpdateHPMaterial.ExecuteIfBound(2.f);
 	SPState->GetStateInfo().hp.currnt+=250.f;
 }
 
 void APlayController::SubHP()
 {
-	SPState->UpdateHPMaterial.ExecuteIfBound();
+	SPState->UpdateHPMaterial.ExecuteIfBound(2.f);
 	SPState->GetStateInfo().hp.currnt-=250.f;
 }

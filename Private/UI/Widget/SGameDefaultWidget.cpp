@@ -17,7 +17,7 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SGameDefaultWidget::Construct(const FArguments& InArgs)
 {
-	
+	InitialElement();
 	ChildSlot
 	[
 		SNew(SCanvas)
@@ -25,8 +25,8 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 		+SCanvas::Slot()
 		.HAlign(HAlign_Left)
 		.VAlign(VAlign_Top)
-		.Position(FVector2D{195.f,96.f})
-		.Size(FVector2D{1000.f,40.f})
+		.Position(FVector2D{207.f,88.f})
+		.Size(FVector2D{1000.f,60.f})
 		[
 			SNew(SVerticalBox)
 			+SVerticalBox::Slot()
@@ -49,7 +49,7 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 				SAssignNew(MPBar,SProgressBar)
 				.Style(&Style::GetGameStyle()->HPBarStyle)
 				.FillColorAndOpacity(FLinearColor{0.02f,0.02f,0.093f,1.f})
-				.Percent_Raw(this,&SGameDefaultWidget::GetHPPercent)
+				.Percent_Raw(this,&SGameDefaultWidget::GetMPPercent)
 			]
 			+SVerticalBox::Slot()
 			.FillHeight(1.f)
@@ -60,7 +60,7 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 				SAssignNew(PPBar,SProgressBar)
 				.Style(&Style::GetGameStyle()->HPBarStyle)
 				.FillColorAndOpacity(FLinearColor{0.036f,0.072f,0.036f,1.f})
-				.Percent(PPPercent)
+				.Percent_Raw(this,&SGameDefaultWidget::GetPPPercent)
 			]		
 		]
 		//头像
@@ -68,7 +68,7 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 		.HAlign(HAlign_Center)
 		.VAlign(VAlign_Center)
 		.Position(FVector2D{152.f,116.f})
-		.Size(FVector2D{80.f,80.f})
+		.Size(FVector2D{106.f,106.f})
 		[
 			SNew(SImage)
 			.Image(&Style::GetGameStyle()->HeadIcon)
@@ -87,7 +87,8 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Fill)
 			.Content()	
 			[
-				SAssignNew(MagicItem,SImage)	
+				SAssignNew(MagicItem,SImage)
+				.ColorAndOpacity(FLinearColor(1.f,1.f,1.f,0.f))
 			]
 		]
 		+SCanvas::Slot()
@@ -103,7 +104,8 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Fill)
 			.Content()	
 			[
-				SAssignNew(LeftHandItem,SImage)	
+				SAssignNew(LeftHandItem,SImage)
+				.ColorAndOpacity(FLinearColor(1.f,1.f,1.f,0.f))
 			]
 		]
 		+SCanvas::Slot()
@@ -119,7 +121,9 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Fill)
 			.Content()	
 			[
-				SAssignNew(RightHandItem,SImage)	
+				SAssignNew(RightHandItem,SImage)
+				.ColorAndOpacity(FLinearColor(1.f,1.f,1.f,0.f))
+				//image内容需要动态变更，下面均是，暂时放着
 			]
 		]
 		+SCanvas::Slot()
@@ -135,7 +139,8 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Fill)
 			.Content()	
 			[
-				SAssignNew(FrontSupplyItem,SImage)	
+				SAssignNew(FrontSupplyItem,SImage)
+				.ColorAndOpacity(FLinearColor(1.f,1.f,1.f,0.f))
 			]
 		]
 		+SCanvas::Slot()
@@ -151,7 +156,8 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 			.VAlign(VAlign_Fill)
 			.Content()	
 			[
-				SAssignNew(BackSupplyItem,SImage)	
+				SAssignNew(BackSupplyItem,SImage)
+				.ColorAndOpacity(FLinearColor(1.f,1.f,1.f,0.f))
 			]
 		]
 		//经验
@@ -183,7 +189,10 @@ void SGameDefaultWidget::Construct(const FArguments& InArgs)
 			]
 		]
 	];
-	InitialElement();
+	//初始化进度条材质
+	InitialMaterial(&HPBarDynamic,HPBar.Get(),HPPercent);
+	InitialMaterial(&MPBarDynamic,MPBar.Get(),MPPercent);
+	InitialMaterial(&PPBarDynamic,PPBar.Get(),PPPercent);
 }
 
 void SGameDefaultWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
@@ -206,6 +215,7 @@ void SGameDefaultWidget::SetBarLength(float HP, float MP, float PP,float limit)
 }
 void SGameDefaultWidget::UpdatePercent()
 {
+	
 	HPPercent = FMath::Lerp(HPPercent,PlayeState->GetStateInfo().hp.currnt/PlayeState->GetStateInfo().hp.max,0.03f);
 	MPPercent = FMath::Lerp(MPPercent,PlayeState->GetStateInfo().mp.currnt/PlayeState->GetStateInfo().mp.max,0.03f);
 	PPPercent = FMath::Lerp(PPPercent,PlayeState->GetStateInfo().pp.currnt/PlayeState->GetStateInfo().pp.max,0.03f);
@@ -214,6 +224,16 @@ void SGameDefaultWidget::UpdatePercent()
 TOptional<float> SGameDefaultWidget::GetHPPercent() const 
 {
 	return HPPercent;
+}
+
+TOptional<float> SGameDefaultWidget::GetPPPercent() const
+{
+	return PPPercent;
+}
+
+TOptional<float> SGameDefaultWidget::GetMPPercent() const
+{
+	return MPPercent;
 }
 
 FText SGameDefaultWidget::GetExpText() const
@@ -236,26 +256,50 @@ FMargin SGameDefaultWidget::GetPPBarLength() const
 	return PPLength;
 }
 
-void SGameDefaultWidget::SetMatrialParm()
+void SGameDefaultWidget::SetMatrialParm(UMaterialInstanceDynamic* barDynaimc,FTimerHandle* handle,int barid)
 {
-	DHelper::Debug(FString("setparam"),2.f);
-	float Detla = HPBarDynamic->K2_GetScalarParameterValue("Percent")-PlayeState->GetStateInfo().hp.currnt/PlayeState->GetStateInfo().hp.max;
-	if(FMath::Abs(Detla)<0.001f)
+	float temp = 0.f;
+	switch(barid)
 	{
-		GWorld->GetTimerManager().ClearTimer(HPBarHandle);
+		case 0:
+			temp = PlayeState->GetStateInfo().hp.currnt/PlayeState->GetStateInfo().hp.max;
+			break;
+		case 1:
+			temp = PlayeState->GetStateInfo().mp.currnt/PlayeState->GetStateInfo().mp.max;
+			break;
+		case 2:
+			temp = PlayeState->GetStateInfo().pp.currnt/PlayeState->GetStateInfo().pp.max;
+		break;
 	}
+	float Detla = barDynaimc->K2_GetScalarParameterValue("Percent")-temp;
+	 if(FMath::Abs(Detla)<0.001f)
+	 {
+	 	GWorld->GetTimerManager().ClearTimer(*handle);
+	 }
 	else
-		HPBarDynamic->SetScalarParameterValue("Percent",FMath::Lerp(HPBarDynamic->K2_GetScalarParameterValue("Percent"),
-			PlayeState->GetStateInfo().hp.currnt/PlayeState->GetStateInfo().hp.max,0.01f));
+		barDynaimc->SetScalarParameterValue("Percent",FMath::Lerp(barDynaimc->K2_GetScalarParameterValue("Percent"),
+			temp,0.05f));
 }
 
-void SGameDefaultWidget::UpdateHPMaterial()
+void SGameDefaultWidget::UpdateHPMaterial(float FirstDelay = 2.f)
 {
-	FTimerDelegate Delegate;
-	Delegate.BindRaw(this,&SGameDefaultWidget::SetMatrialParm);
+	FTimerDelegate Delegate = FTimerDelegate::CreateRaw(this,&SGameDefaultWidget::SetMatrialParm,HPBarDynamic,&HPBarHandle,0);
 	float detla = HPBarDynamic->K2_GetScalarParameterValue("Percent")-PlayeState->GetStateInfo().hp.currnt/PlayeState->GetStateInfo().hp.max;
-		GWorld->GetTimerManager().SetTimer(HPBarHandle,Delegate,0.01f,true,2.f);
-	DHelper::Debug(FString("SetTimer"),2.f);
+		GWorld->GetTimerManager().SetTimer(HPBarHandle,Delegate,0.01f,true,FirstDelay);
+}
+
+void SGameDefaultWidget::UpdateMPMaterial(float FirstDelay = 2.f)
+{
+	FTimerDelegate Delegate = FTimerDelegate::CreateRaw(this,&SGameDefaultWidget::SetMatrialParm,MPBarDynamic,&MPBarHandle,1);
+	float detla = MPBarDynamic->K2_GetScalarParameterValue("Percent")-PlayeState->GetStateInfo().mp.currnt/PlayeState->GetStateInfo().mp.max;
+	GWorld->GetTimerManager().SetTimer(MPBarHandle,Delegate,0.01f,true,FirstDelay);
+}
+
+void SGameDefaultWidget::UpdatePPMaterial(float FirstDelay = 2.f)
+{
+	FTimerDelegate Delegate = FTimerDelegate::CreateRaw(this,&SGameDefaultWidget::SetMatrialParm,PPBarDynamic,&PPBarHandle,2);
+	float detla = PPBarDynamic->K2_GetScalarParameterValue("Percent")-PlayeState->GetStateInfo().pp.currnt/PlayeState->GetStateInfo().pp.max;
+	GWorld->GetTimerManager().SetTimer(PPBarHandle,Delegate,0.01f,true,FirstDelay);
 }
 
 void SGameDefaultWidget::InitialElement()
@@ -264,26 +308,34 @@ void SGameDefaultWidget::InitialElement()
 	//初始化进度条长度，大小
 	if(control)
 	{
+		THPLength.Bind(this,&SGameDefaultWidget::GetHPBarLength);
+		TMPLength.Bind(this,&SGameDefaultWidget::GetMPBarLength);
+		TPPLength.Bind(this,&SGameDefaultWidget::GetPPBarLength);
+		
 		PlayeState = Cast<APlayeState>(control->PlayerState);
-		HPLength = {0.f,0.f,(1.f-PlayeState->GetStateInfo().hp.max/PlayeState->GetStateInfo().hp.limit)*1000.f,5.f};
-		MPLength = {0.f,0.f,PlayeState->GetStateInfo().mp.max/PlayeState->GetStateInfo().mp.limit*1000.f,5.f};
-		PPLength = {0.f,0.f,PlayeState->GetStateInfo().pp.max/PlayeState->GetStateInfo().pp.limit*1000.f,0.f};
+		float temp = (1.f-PlayeState->GetStateInfo().hp.max/PlayeState->GetStateInfo().hp.limit)*1000.f;
+		HPLength = {0.f,0.f,temp,5.f};
+		temp = (1.f- PlayeState->GetStateInfo().mp.max/PlayeState->GetStateInfo().mp.limit)*1000.f;
+		MPLength = {0.f,0.f,temp,5.f};
+		temp = (1.f- PlayeState->GetStateInfo().pp.max/PlayeState->GetStateInfo().pp.limit)*1000.f;
+		PPLength = {0.f,0.f,temp,0.f};
 		HPPercent = PlayeState->GetStateInfo().hp.currnt/PlayeState->GetStateInfo().hp.max;
 		MPPercent = PlayeState->GetStateInfo().mp.currnt/PlayeState->GetStateInfo().mp.max;
 		PPPercent = PlayeState->GetStateInfo().pp.currnt/PlayeState->GetStateInfo().pp.max;
 	}
-	THPLength.Bind(this,&SGameDefaultWidget::GetHPBarLength);
-	TMPLength.Bind(this,&SGameDefaultWidget::GetMPBarLength);
-	TPPLength.Bind(this,&SGameDefaultWidget::GetPPBarLength);
-	//初始化进度条材质
+
+}
+
+void SGameDefaultWidget::InitialMaterial(UMaterialInstanceDynamic **bardynamic,SProgressBar* bar,float percent)
+{
 	UMaterialInterface* BarMatInst = LoadObject<UMaterialInterface>(nullptr,TEXT("MaterialInstanceConstant'/Game/UI/Material/Mat_ProcessB_Inst.Mat_ProcessB_Inst'"));
-	HPBarDynamic = UMaterialInstanceDynamic::Create(BarMatInst,nullptr);
-	FSlateBrush* HPBrush = new FSlateBrush();
-	HPBrush->DrawAs= ESlateBrushDrawType::Image;
-	HPBrush->SetResourceObject(HPBarDynamic);
-	HPBrush->TintColor = FLinearColor{0.138f,0.147f,0.076f,1.f};
-	HPBar.Get()->SetBackgroundImage(HPBrush);
-	HPBarDynamic->SetScalarParameterValue(FName("Percent"),HPPercent);
+	*bardynamic = UMaterialInstanceDynamic::Create(BarMatInst,nullptr);
+	FSlateBrush* Brush = new FSlateBrush;
+	Brush->DrawAs= ESlateBrushDrawType::Image;
+	Brush->SetResourceObject(*bardynamic);
+	Brush->TintColor = FLinearColor{0.138f,0.147f,0.076f,1.f};
+	bar->SetBackgroundImage(Brush);
+	(*bardynamic)->SetScalarParameterValue(FName("Percent"),percent);
 }
 
 

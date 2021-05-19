@@ -34,7 +34,6 @@ UAnimInst::UAnimInst()
 
 void UAnimInst::NativeUpdateAnimation(float DeltaSeconds)
 {
-	
 	InitCharacter();
 	UpdateParameter();
 }
@@ -47,7 +46,8 @@ void UAnimInst::Attack()
 	 {
 	 	Montage_Play(MontageAL1);
 	 	bCanCombat = true;
-	 	GetWorld()->GetTimerManager().SetTimer(CombatHandle,this,&UAnimInst::DisableCombat,0.6f);
+	 	//inRate为连击宽容度，越大越容易连击
+	 	GetWorld()->GetTimerManager().SetTimer(CombatHandle,this,&UAnimInst::DisableCombat,1.2f);
 	 }
 	 else
 	 {

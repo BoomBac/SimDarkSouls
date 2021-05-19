@@ -5,9 +5,9 @@
 
 FStateInfo::FStateInfo()
 {
-	hp={2000.f,500.f,50.f,250.f};
-	mp={2000.f,500.f,50.f,100.f};
-	pp={2000.f,500.f,50.f,150.f};
+	hp={2000.f,500.f,0.f,250.f};
+	mp={2000.f,500.f,0.f,100.f};
+	pp={2000.f,500.f,0.f,150.f,50.f};
 	Tough = 100;
 	Exp = 100;
 }
@@ -23,6 +23,6 @@ FStateInfo& APlayeState::GetStateInfo()
 	return StateInfo;
 }
 
-void APlayeState::SetStateInfo(FStateInfo NewValue)
+void APlayeState::SetStateInfo()
 {
 }

@@ -4,6 +4,7 @@
 #include "PlayerCharacter.h"
 
 #include "AnimInst.h"
+#include "AttackComponent.h"
 #include "DevelopTool.h"
 #include "PlayController.h"
 #include "WeaponObject.h"
@@ -56,28 +57,17 @@ APlayerCharacter::APlayerCharacter()
 	//实例手上物品
 	RighetHandIbject = CreateDefaultSubobject<UChildActorComponent>(TEXT("RightHand"));
 	LeftHandObject = CreateDefaultSubobject<UChildActorComponent>(TEXT("LeftHand"));
-	
-	
-
 	bIsViewLocked = false;
 	bIsFalling = false;
 	bIsRun = false;
+	//实例化攻击检测组件
+	AttackComponent = CreateDefaultSubobject<UAttackComponent>(TEXT("AttackComp"));
+	AttackComponent->OnHitted.BindUFunction(this,FName("OnHitted"));
+
+	PlayerCombatState = EPlayerState::Normal;
 }
 
-// Called when the game starts or when spawned
-void APlayerCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	DSPlayerController = Cast<APlayController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	DSPlayerState = Cast<APlayeState>(DSPlayerController->PlayerState);
-	//这句放在构造时，调用动画实例的函数会报空
-	Animation = Cast<UAnimInst>(GetMesh()->AnimScriptInstance);
-	//把手持物品组件绑定到第三人称模型右手插槽上
-	RighetHandIbject->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Weapon"));
-	LeftHandObject->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Shield"));
-	//添加Actor到HandObject
-//	RighetHandIbject->SetChildActorClass(AWeaponObject::SpawnHandWeapon(0));
-}
+
 
 void APlayerCharacter::GetMoveForward(float value)
 {
@@ -121,8 +111,14 @@ void APlayerCharacter::LookUp(float Value)
 
 void APlayerCharacter::Run()
 {
+	//耐力测试
+	if(DSPlayerState->GetStateInfo().pp.currnt<=0.f) return;
 	if(FMath::Abs(MoveForward)+FMath::Abs(MoveRight)>0)
-	bIsRun = true;
+	{
+		bIsRun = true;
+		FTimerDelegate TimerDelegate = FTimerDelegate::CreateUFunction(this,FName("ReducePP"),10.f);
+		GetWorld()->GetTimerManager().SetTimer(Runhandle,TimerDelegate,0.1f,true);
+	}
 	else
 	{
 		Animation->Dodge();
@@ -131,6 +127,7 @@ void APlayerCharacter::Run()
 void APlayerCharacter::unRun()
 {
 	bIsRun = false;
+	GetWorld()->GetTimerManager().ClearTimer(Runhandle);
 }
 
 void APlayerCharacter::ViewLock()
@@ -140,11 +137,21 @@ void APlayerCharacter::ViewLock()
 
 void APlayerCharacter::Attack()
 {
+	//耐力测试
+	if(DSPlayerState->GetStateInfo().pp.currnt<=220.f) return;
+	
 	Animation->Attack();
+	DSPlayerState->GetStateInfo().pp.currnt-=220.f;
+	DSPlayerState->UpdatePPMaterial.ExecuteIfBound(2.f);
 }
 
 void APlayerCharacter::Roll()
 {
+	//耐力测试
+	if(DSPlayerState->GetStateInfo().pp.currnt<=180.f) return;
+	
+	DSPlayerState->GetStateInfo().pp.currnt -=180.f;
+	DSPlayerState->UpdatePPMaterial.ExecuteIfBound(2.f);
 	if(!bIsViewLocked)
 	{
 		Animation->Roll(0);
@@ -177,11 +184,60 @@ void APlayerCharacter::CalculateAnimData()
 	
 }
 
+void APlayerCharacter::OnHitted(FAttackInfo AttackInfo)
+{
+}
+//耐力恢复
+void APlayerCharacter::RecoverPP()
+{
+	if(DSPlayerState->GetStateInfo().pp.currnt<DSPlayerState->GetStateInfo().pp.min)
+	{
+		DSPlayerState->GetStateInfo().pp.currnt = 0.f;
+		GetWorld()->GetTimerManager().ClearTimer(PPRecoverHandle);
+		bRecoverHandleSet=false;
+		return;
+	}
+	if(DSPlayerState->GetStateInfo().pp.currnt>DSPlayerState->GetStateInfo().pp.max)
+	{
+		DSPlayerState->GetStateInfo().pp.currnt = DSPlayerState->GetStateInfo().pp.max;
+		return;
+	}
+	DSPlayerState->GetStateInfo().pp.currnt +=DSPlayerState->GetStateInfo().pp.RecoverSpeed/10.f;
+}
+// Called when the game starts or when spawned
+void APlayerCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	DSPlayerController = Cast<APlayController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	DSPlayerState = Cast<APlayeState>(DSPlayerController->PlayerState);
+	//这句放在构造时，调用动画实例的函数会报空
+	Animation = Cast<UAnimInst>(GetMesh()->AnimScriptInstance);
+	//把手持物品组件绑定到第三人称模型右手插槽上
+	RighetHandIbject->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Weapon"));
+	LeftHandObject->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("Shield"));
+	//添加Actor到HandObject
+	RighetHandIbject->SetChildActorClass(AWeaponObject::SpawnHandWeapon(1));
+	LeftHandObject->SetChildActorClass(AWeaponObject::SpawnHandWeapon(2));
+	//设置背景材质更新
+	DSPlayerState->UpdatePPMaterial.ExecuteIfBound(0.f);
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	CalculateAnimData();
+	//攻击检测
+	AttackComponent->AttackDetect(GetMesh(),FName("Weapon"),FName("WeaponPeek"),ETraceTypeQuery::TraceTypeQuery3,CurrentInfo);
+	DHelper::Debug(FString::SanitizeFloat(DSPlayerState->GetStateInfo().pp.currnt),0.f);
+	//耐力恢复
+	if(DSPlayerState->GetStateInfo().pp.currnt<=DSPlayerState->GetStateInfo().pp.max&&!bRecoverHandleSet)
+	{
+		FTimerDelegate TimerDelegate;
+		TimerDelegate.BindUFunction(this,FName("RecoverPP"));
+		GetWorld()->GetTimerManager().SetTimer(PPRecoverHandle,TimerDelegate,0.1,true,0.f);
+		bRecoverHandleSet = true;
+	}
 }
 
 // Called to bind functionality to input
@@ -197,5 +253,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Run",IE_Released,this,&APlayerCharacter::unRun);
 	PlayerInputComponent->BindAction("ViewLock",IE_Pressed,this,&APlayerCharacter::ViewLock);
 	PlayerInputComponent->BindAction("Attack",IE_Pressed,this,&APlayerCharacter::Attack);
+}
+
+void APlayerCharacter::ReducePP(float ReduceRate)
+{
+	DSPlayerState->GetStateInfo().pp.currnt-=ReduceRate;
+	DSPlayerState->UpdatePPMaterial.ExecuteIfBound(0.f);
 }
 

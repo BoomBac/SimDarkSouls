@@ -28,5 +28,7 @@ void AGameHUD::BeginPlay()
 	{
 		GM->SPState->OnLimitChanged.BindRaw(GameHUDWidget->DefaultHud.Get(),&SGameDefaultWidget::SetBarLength);
 		GM->SPState->UpdateHPMaterial.BindRaw(GameHUDWidget->DefaultHud.Get(),&SGameDefaultWidget::UpdateHPMaterial);
+		GM->SPState->UpdateMPMaterial.BindRaw(GameHUDWidget->DefaultHud.Get(),&SGameDefaultWidget::UpdateMPMaterial);
+		GM->SPState->UpdatePPMaterial.BindRaw(GameHUDWidget->DefaultHud.Get(),&SGameDefaultWidget::UpdatePPMaterial);
 	}
 }

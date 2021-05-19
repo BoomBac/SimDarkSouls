@@ -24,3 +24,13 @@ namespace EOptionIconType
 	};
 }
 
+namespace EPlayerState
+{
+	enum Type
+	{
+		Normal,
+		Rigid,
+		Block,
+		Collapse
+	};
+}
